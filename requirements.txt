@@ -1,0 +1,6 @@
+azure-functions
+azure-storage-blob
+azure-storage-file-datalake
+polars
+pytest
+pre-commit
