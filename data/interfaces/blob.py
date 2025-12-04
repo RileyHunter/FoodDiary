@@ -4,12 +4,14 @@ from utils import is_prod
 import logging
 
 _storage_account = "fooddiarystorage"
-_storage_key = os.environ["FOODDIARY_STORAGE_ACCOUNT_KEY"]
+_storage_key = os.environ.get("FOODDIARY_STORAGE_ACCOUNT_KEY", default=None)
 _service_client = None
 _file_system_client = None
 
 def get_service_client():
     global _storage_account, _storage_key, _service_client
+    if _storage_key is None:
+        raise ValueError("Storage account key is not set in environment variables.")
     if _service_client is None:
         account_url = f"https://{_storage_account}.dfs.core.windows.net"
         _service_client = DataLakeServiceClient(account_url=account_url, credential=_storage_key)
