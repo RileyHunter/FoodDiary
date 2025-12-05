@@ -47,8 +47,10 @@ jobs:
 
       - name: Zip artifact for deployment
         run: |
-          rm -rf venv/
-          zip release.zip ./* -r -x "venv/*"
+          zip release.zip ./* -r \
+            -x "venv/*" \
+            -x "pyvenv.cfg" \
+            -x "pytests/*"
 
       - name: Upload artifact for deployment job
         uses: actions/upload-artifact@v4
@@ -83,3 +85,5 @@ jobs:
           package: ${{ env.AZURE_FUNCTIONAPP_PACKAGE_PATH }}
           publish-profile: ${{ secrets.AZUREAPPSERVICE_PUBLISHPROFILE_E392C29FF68548CA8021844EA30E6357 }}
           scm-do-build-during-deployment: true
+          remote-build: true
+          enable-oryx-build: true
