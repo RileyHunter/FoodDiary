@@ -52,6 +52,7 @@ jobs:
             -x "pyvenv.cfg" \
             -x "pytests/*" \
             -x "pytest.ini" \
+            -x "__pycache__/*" \
             -x "**/__pycache__/*" \
             -x "local.settings.json" \
 
