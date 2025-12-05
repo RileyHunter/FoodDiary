@@ -10,7 +10,7 @@ class DiaryEntries(EntityBase):
     def additional_schema(self) -> dict:
         return {
             "UserId": pl.Utf8,
-            "FoodId": pl.Utf8,
+            "Food": pl.Utf8,
             "ConsumedAt": pl.Datetime("us", "UTC"),
             "Notes": pl.Utf8
         }

@@ -1,0 +1,130 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Food Tracker</title>
+</head>
+<body>
+    <div id="loginForm" style="display: none;">
+        <h2>Login</h2>
+        <form id="loginFormElement">
+            <label>Username: <input type="text" id="username" required></label><br><br>
+            <label>Password: <input type="password" id="password" required></label><br><br>
+            <button type="submit">Login</button>
+        </form>
+        <div id="loginError" style="color: red; margin-top: 10px;"></div>
+    </div>
+
+    <div id="dataForm" style="display: none;">
+        <h2>Food Entry</h2>
+        <button id="logoutBtn">Logout</button>
+        <br><br>
+        <form id="dataFormElement">
+            <label>Food: <input type="text" id="food" required></label><br><br>
+            <label>Consumed At: <input type="datetime-local" id="consumedAt" required></label><br><br>
+            <label>Notes: <textarea id="notes" rows="4" cols="50"></textarea></label><br><br>
+            <button type="submit">Submit</button>
+        </form>
+        <div id="submitStatus" style="margin-top: 10px;"></div>
+    </div>
+
+    <script>
+        const API_ENDPOINT = 'https://your-api-endpoint.com'; // Replace with your actual API endpoint
+
+        function checkAuth() {
+            const token = localStorage.getItem('jwt');
+            if (token) {
+                document.getElementById('loginForm').style.display = 'none';
+                document.getElementById('dataForm').style.display = 'block';
+            } else {
+                document.getElementById('loginForm').style.display = 'block';
+                document.getElementById('dataForm').style.display = 'none';
+            }
+        }
+
+        document.getElementById('loginFormElement').addEventListener('submit', async (e) => {
+            e.preventDefault();
+            const username = document.getElementById('username').value;
+            const password = document.getElementById('password').value;
+            const credentials = btoa(`${username}:${password}`);
+
+            try {
+                const response = await fetch(`${API_ENDPOINT}/login`, {
+                    method: 'POST',
+                    headers: {
+                        'Authorization': `Basic ${credentials}`,
+                        'Content-Type': 'application/json'
+                    }
+                });
+
+                if (response.ok) {
+                    const data = await response.json();
+                    localStorage.setItem('jwt', data.token);
+                    document.getElementById('loginError').textContent = '';
+                    checkAuth();
+                } else {
+                    document.getElementById('loginError').textContent = 'Login failed. Please check your credentials.';
+                }
+            } catch (error) {
+                document.getElementById('loginError').textContent = 'Error connecting to server.';
+            }
+        });
+
+        document.getElementById('logoutBtn').addEventListener('click', () => {
+            localStorage.removeItem('jwt');
+            document.getElementById('username').value = '';
+            document.getElementById('password').value = '';
+            checkAuth();
+        });
+
+        document.getElementById('dataFormElement').addEventListener('submit', async (e) => {
+            e.preventDefault();
+            const token = localStorage.getItem('jwt');
+            const food = document.getElementById('food').value;
+            const consumedAtLocal = document.getElementById('consumedAt').value;
+            const notes = document.getElementById('notes').value;
+
+            // Convert local datetime to UTC
+            const consumedAtUTC = new Date(consumedAtLocal).toISOString();
+
+            const payload = {
+                food: food,
+                consumedAt: consumedAtUTC,
+                notes: notes
+            };
+
+            try {
+                const response = await fetch(`${API_ENDPOINT}/data`, {
+                    method: 'POST',
+                    headers: {
+                        'Authorization': `Bearer ${token}`,
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify(payload)
+                });
+
+                if (response.ok) {
+                    document.getElementById('submitStatus').style.color = 'green';
+                    document.getElementById('submitStatus').textContent = 'Data submitted successfully!';
+                    document.getElementById('dataFormElement').reset();
+                } else if (response.status === 401) {
+                    document.getElementById('submitStatus').style.color = 'red';
+                    document.getElementById('submitStatus').textContent = 'Session expired. Please login again.';
+                    localStorage.removeItem('jwt');
+                    setTimeout(checkAuth, 2000);
+                } else {
+                    document.getElementById('submitStatus').style.color = 'red';
+                    document.getElementById('submitStatus').textContent = 'Error submitting data.';
+                }
+            } catch (error) {
+                document.getElementById('submitStatus').style.color = 'red';
+                document.getElementById('submitStatus').textContent = 'Error connecting to server.';
+            }
+        });
+
+        // Check authentication status on page load
+        checkAuth();
+    </script>
+</body>
+</html>

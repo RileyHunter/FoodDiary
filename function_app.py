@@ -4,7 +4,7 @@ from data.interfaces.blob import get_adlfs_path, get_file_client
 from data.entities.diary_entry import DiaryEntries
 from datetime import datetime, timezone
 
-app = func.FunctionApp(http_auth_level=func.AuthLevel.FUNCTION)
+app = func.FunctionApp(http_auth_level=func.AuthLevel.ANONYMOUS)
 
 @app.function_name(name="debug_endpoint")
 @app.route(route="debug")
@@ -13,7 +13,7 @@ def main(req: func.HttpRequest) -> str:
     diary = DiaryEntries()
     instance_id = diary.create({
         "UserId": "user-123",
-        "FoodId": "food-456",
+        "Food": "BEANS!",
         "ConsumedAt": datetime.now(timezone.utc),
         "Notes": "Breakfast"
     })
