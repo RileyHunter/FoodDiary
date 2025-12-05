@@ -50,7 +50,11 @@ jobs:
           zip release.zip ./* -r \
             -x "venv/*" \
             -x "pyvenv.cfg" \
-            -x "pytests/*"
+            -x "pytests/*" \
+            -x "pytest.ini" \
+            -x "**/__pycache__/*" \
+            -x "local.settings.json" \
+
 
       - name: Upload artifact for deployment job
         uses: actions/upload-artifact@v4
